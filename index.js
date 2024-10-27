@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 
@@ -13,7 +13,7 @@ app.use(express.json());
 
 // MongoDB Connection URL
 const uri = process.env.MONGODB_URI;
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const client = new MongoClient(uri);
 
 async function run() {
     try {
@@ -22,10 +22,11 @@ async function run() {
         console.log("Connected to MongoDB");
         const db = client.db('portfolio');
         const projectsCollection = db.collection('projects');
+        const skillsCollection = db.collection('skills');
         
         app.get("/project/:id", async (req, res) => {
             const id = req.params.id;
-            const result = await collection.findOne({ _id: new ObjectId(id) });
+            const result = await projectsCollection.findOne({ _id: new ObjectId(id) });
             // console.log(result);
             res.send(result);
           });
@@ -41,6 +42,18 @@ async function run() {
           const task = req.body;
         
           const result = await projectsCollection.insertOne(task);
+          res.send(result);
+        });
+        app.get('/all-skills', async (req, res) => {
+          
+          const cursor = skillsCollection.find();
+          const skills = await cursor.toArray();
+          res.send({ status: true, data: skills });
+        });
+        app.post('/skills', async (req, res) => {
+          const skill = req.body;
+        
+          const result = await skillsCollection.insertOne(skill);
           res.send(result);
         });
 
