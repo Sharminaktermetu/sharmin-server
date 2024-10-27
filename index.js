@@ -3,7 +3,6 @@ const cors = require('cors');
 const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
 
-
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -27,12 +26,10 @@ async function run() {
         app.get("/project/:id", async (req, res) => {
             const id = req.params.id;
             const result = await projectsCollection.findOne({ _id: new ObjectId(id) });
-            // console.log(result);
             res.send(result);
           });
 
         app.get('/all-projects', async (req, res) => {
-          
           const cursor = projectsCollection.find();
           const tasks = await cursor.toArray();
           res.send({ status: true, data: tasks });
@@ -40,34 +37,25 @@ async function run() {
     
         app.post('/projects', async (req, res) => {
           const task = req.body;
-        
           const result = await projectsCollection.insertOne(task);
           res.send(result);
         });
+        
         app.get('/all-skills', async (req, res) => {
-          
           const cursor = skillsCollection.find();
           const skills = await cursor.toArray();
           res.send({ status: true, data: skills });
         });
+        
         app.post('/skills', async (req, res) => {
           const skill = req.body;
-        
           const result = await skillsCollection.insertOne(skill);
           res.send(result);
         });
 
-        // ==============================================================
-        // WRITE YOUR CODE HERE
-        // ==============================================================
-
-
-        // Start the server
-        app.listen(port, () => {
-            console.log(`Server is running on http://localhost:${port}`);
-        });
-
     } finally {
+        // Close the MongoDB client connection when the function completes
+        client.close();
     }
 }
 
@@ -81,3 +69,6 @@ app.get('/', (req, res) => {
     };
     res.json(serverStatus);
 });
+
+// Export the app as a serverless function for Vercel
+module.exports = app;
